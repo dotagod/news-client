@@ -98,7 +98,7 @@ pytest tests/
 
 mypy src/currents_news_client/
 
-black src/ tests/
+python3 -m flake8 src/ --config setup.cfg
 ```
 
 ### Project Structure

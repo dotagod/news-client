@@ -1,0 +1,18 @@
+{
+  "latest_news_response": {
+    "status": "ok",
+    "news": [
+      {
+        "id": "sample-latest-1",
+        "title": "Latest Technology News",
+        "description": "Breaking technology news from around the world",
+        "url": "https://example.com/latest-tech",
+        "author": "Tech Reporter",
+        "image": "https://example.com/tech-image.jpg",
+        "language": "en",
+        "category": ["technology"],
+        "published": "2025-08-24 15:00:00 +0000"
+      }
+    ]
+  }
+} 

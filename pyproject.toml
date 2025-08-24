@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "currents-news-client"
+version = "1.0.0"
+description = "A Python client for Currents News API"
+requires-python = ">=3.8"
+dependencies = [
+    "requests>=2.28.0",
+    "python-dotenv>=0.19.0",
+    "pydantic>=1.10.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"} 

@@ -22,7 +22,7 @@ class NewsArticle(BaseModel):
         default_factory=list,
         description='Article topics',
     )
-    published: datetime = Field(..., description='Publication date')
+    published: str = Field(..., description='Publication date')
 
     class Config:
         """Pydantic configuration."""

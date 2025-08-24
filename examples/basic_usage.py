@@ -29,7 +29,7 @@ def main():
                 print(f'\n{index}. {article.title}')
                 print(f'   Author: {article.author or "Unknown"}')
                 print(f'   Category: {", ".join(article.category) if article.category else "Uncategorized"}')
-                print(f'   Published: {article.published.strftime("%Y-%m-%d %H:%M")}')
+                print(f'   Published: {article.published}')
                 print(f'   URL: {article.url}')
 
             print('\nSearching for tech news...')

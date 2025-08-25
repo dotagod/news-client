@@ -106,6 +106,7 @@ ERROR_MESSAGES = MappingProxyType({
     'limit_out_of_range': 'Limit must be between 1 and 100',
 })
 
+# HTTP status codes mapping
 HTTP_STATUS_CODES = MappingProxyType({
     200: 'OK',
     400: 'Bad Request',

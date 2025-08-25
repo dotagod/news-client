@@ -82,6 +82,7 @@ class TestCurrentsClient:
 
         client = CurrentsClient(valid_api_key)
 
+        # Test various validation failures
         with pytest.raises(CurrentsValidationError):
             client.get_latest_news('invalid_language')
 

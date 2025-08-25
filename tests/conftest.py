@@ -5,14 +5,22 @@ from unittest.mock import Mock
 import pytest
 import requests
 
+# Constants to avoid string literal over-use
+STATUS_OK = 'ok'
+STATUS_ERROR = 'error'
+
 
 @pytest.fixture
 def mock_response():
-    """Create a mock successful response."""
+    """Create a mock successful response.
+
+    Returns:
+        Mock response object
+    """
     mock = Mock()
     mock.status_code = 200
     mock.json.return_value = {
-        'status': 'ok',
+        'status': STATUS_OK,
         'news': [
             {
                 'id': 'test-id-1',
@@ -44,11 +52,15 @@ def mock_response():
 
 @pytest.fixture
 def mock_error_response():
-    """Create a mock error response."""
+    """Create a mock error response.
+
+    Returns:
+        Mock error response object
+    """
     mock = Mock()
     mock.status_code = 401
     mock.json.return_value = {
-        'status': 'error',
+        'status': STATUS_ERROR,
         'message': 'Invalid API key',
     }
     mock.raise_for_status.side_effect = requests.exceptions.HTTPError(
@@ -59,12 +71,16 @@ def mock_error_response():
 
 @pytest.fixture
 def mock_rate_limit_response():
-    """Create a mock rate limit response."""
+    """Create a mock rate limit response.
+
+    Returns:
+        Mock rate limit response object
+    """
     mock = Mock()
     mock.status_code = 429
     mock.headers = {'Retry-After': '60'}
     mock.json.return_value = {
-        'status': 'error',
+        'status': STATUS_ERROR,
         'message': 'Rate limit exceeded',
     }
     mock.raise_for_status.side_effect = requests.exceptions.HTTPError(
@@ -75,9 +91,13 @@ def mock_rate_limit_response():
 
 @pytest.fixture
 def sample_news_data():
-    """Create sample news data for testing."""
+    """Create sample news data for testing.
+
+    Returns:
+        Sample news data dictionary
+    """
     return {
-        'status': 'ok',
+        'status': STATUS_OK,
         'news': [
             {
                 'id': 'sample-id-1',
@@ -96,11 +116,19 @@ def sample_news_data():
 
 @pytest.fixture
 def valid_api_key():
-    """Create a valid API key for testing."""
+    """Create a valid API key for testing.
+
+    Returns:
+        Valid API key string
+    """
     return 'valid-api-key-12345'
 
 
 @pytest.fixture
 def invalid_api_key():
-    """Create an invalid API key for testing."""
+    """Create an invalid API key for testing.
+
+    Returns:
+        Invalid API key string
+    """
     return 'invalid-api-key'

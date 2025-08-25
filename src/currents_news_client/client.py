@@ -28,6 +28,7 @@ from .types import (
     SEARCH_ENDPOINT,
 )
 
+# HTTP status codes we care about
 HTTP401 = 401
 HTTP400 = 400
 HTTP429 = 429

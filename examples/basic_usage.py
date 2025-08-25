@@ -12,6 +12,7 @@ def main():
     print('Currents News API Client - Example')
     print('=' * 40)
 
+    # Check if API key is set
     if not os.getenv('NEWS_API_KEY'):
         print('NEWS_API_KEY not set')
         print('Set it first:')
@@ -36,6 +37,7 @@ def main():
             tech_news = client.search_news('technology', limit=2)
             print(f'Found {tech_news.total_count} tech articles')
 
+            # Tech news
             for index, article in enumerate(tech_news.news, 1):
                 print(f'\n{index}. {article.title}')
                 print(f'   Description: {article.description[:100]}...')
@@ -45,6 +47,7 @@ def main():
             business_news = client.get_category_news('business', limit=2)
             print(f'Found {business_news.total_count} business articles')
 
+            # Business news
             for index, article in enumerate(latest_news.news, 1):
                 print(f'\n{index}. {article.title}')
                 print(f'   Author: {article.author or "Unknown"}')

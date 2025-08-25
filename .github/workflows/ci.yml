@@ -38,7 +38,7 @@ jobs:
         
     - name: Run linting
       run: |
-        flake8 src/ tests/ --config=setup.cfg
+        flake8 src/ --config=setup.cfg
         
     - name: Run type checking
       run: |

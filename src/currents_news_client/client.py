@@ -49,10 +49,22 @@ class _ParameterValidator:
         Raises:
             CurrentsValidationError: If language is not supported
         """
-        valid_languages = (  # noqa: WPS317
-            'en', 'es', 'fr', 'de', 'it', 'pt', 'ru',
-            'ar', 'hi', 'zh', 'ja', 'ko', 'th', 'vi',
-        )
+        valid_languages = [
+            'en',
+            'es',
+            'fr',
+            'de',
+            'it',
+            'pt',
+            'ru',
+            'ar',
+            'hi',
+            'zh',
+            'ja',
+            'ko',
+            'th',
+            'vi',
+        ]
         if language not in valid_languages:
             raise CurrentsValidationError(
                 ERROR_MESSAGES['invalid_language'].format(language=language),
@@ -79,11 +91,20 @@ class _ParameterValidator:
         Raises:
             CurrentsValidationError: If category is not supported
         """
-        valid_categories = (  # noqa: WPS317
-            'world', 'politics', 'business', 'technology',
-            'sports', 'entertainment', 'health', 'science',
-            'regional', 'hardware', 'lifestyle', 'travel',
-        )
+        valid_categories = [
+            'world',
+            'politics',
+            'business',
+            'technology',
+            'sports',
+            'entertainment',
+            'health',
+            'science',
+            'regional',
+            'hardware',
+            'lifestyle',
+            'travel',
+        ]
         if category not in valid_categories:
             raise CurrentsValidationError(
                 ERROR_MESSAGES['invalid_category'].format(category=category),
@@ -225,6 +246,89 @@ class _HTTPErrorHandler:
         )
 
 
+class HTTPClient:
+    """Handles HTTP requests, retries, and error handling."""
+
+    def __init__(self, api_key: str, base_url: str) -> None:
+        """Initialize the HTTP client.
+
+        Args:
+            api_key: API key for authentication
+            base_url: API base URL
+        """
+        self.base_url = base_url.rstrip('/')
+        self.session = requests.Session()
+        self.session.params = {'apiKey': api_key}
+
+        self.max_retries = 3
+        self.retry_delay = 1
+        self._http_error_handler = _HTTPErrorHandler()
+
+    def request(
+        self,
+        endpoint: str,
+        request_params: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Make API request with retry logic.
+
+        Args:
+            endpoint: API endpoint to call
+            request_params: Query parameters
+
+        Returns:
+            Response data
+
+        Raises:
+            CurrentsConnectionError: If all retries fail
+        """
+        url = '{0}{1}'.format(self.base_url, endpoint)
+
+        for attempt in range(self.max_retries):
+            try:
+                response = self.session.get(
+                    url,
+                    params=request_params,
+                    timeout=REQUEST_TIMEOUT,
+                )
+            except requests.exceptions.RequestException:
+                if attempt == self.max_retries - 1:
+                    raise CurrentsConnectionError(ERROR_MESSAGES['connection_error'])
+                time.sleep(self.retry_delay * (2 ** attempt))
+                continue
+
+            return self._handle_response(response)
+
+        raise CurrentsConnectionError(ERROR_MESSAGES['connection_error'])
+
+    def close(self) -> None:
+        """Close the HTTP session."""
+        if self.session:
+            self.session.close()
+
+    def _handle_response(self, response: requests.Response) -> Dict[str, Any]:
+        """Process API response and handle errors.
+
+        Args:
+            response: HTTP response object
+
+        Returns:
+            Parsed response data
+
+        Raises:
+            CurrentsResponseError: For invalid response format
+        """
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError:
+            self._http_error_handler.handle_http_error(response.status_code, response)
+
+        response_data = self._http_error_handler.parse_response_json(response)
+
+        if not isinstance(response_data, dict):
+            raise CurrentsResponseError(ERROR_MESSAGES['invalid_response'])
+        return response_data
+
+
 class CurrentsClient:
     """Client for Currents News API."""
 
@@ -238,18 +342,12 @@ class CurrentsClient:
         Raises:
             CurrentsAuthenticationError: If no API key is provided
         """
-        self.api_key = api_key or os.getenv('NEWS_API_KEY')
-        if not self.api_key:
+        api_key = api_key or os.getenv('NEWS_API_KEY')
+        if not api_key:
             raise CurrentsAuthenticationError(ERROR_MESSAGES['invalid_api_key'])
 
-        self.base_url = base_url.rstrip('/')
-        self.session = requests.Session()
-        self.session.params = {'apiKey': self.api_key}
-
-        self.max_retries = 3
-        self.retry_delay = 1
+        self._http_client = HTTPClient(api_key, base_url)
         self._validator = _ParameterValidator()
-        self._http_error_handler = _HTTPErrorHandler()
 
     def get_latest_news(self, language: str = DEFAULT_LANGUAGE, limit: int = DEFAULT_LIMIT) -> NewsResponse:
         """Get latest news articles.
@@ -268,7 +366,7 @@ class CurrentsClient:
             'limit': limit,
         }
 
-        response_data = self._make_request(LATEST_NEWS_ENDPOINT, request_params)
+        response_data = self._http_client.request(LATEST_NEWS_ENDPOINT, request_params)
         return NewsResponse(**response_data)
 
     def search_news(
@@ -300,7 +398,7 @@ class CurrentsClient:
         if domain:
             request_params['domain'] = domain
 
-        response_data = self._make_request(SEARCH_ENDPOINT, request_params)
+        response_data = self._http_client.request(SEARCH_ENDPOINT, request_params)
         return NewsResponse(**response_data)
 
     def get_category_news(
@@ -327,7 +425,7 @@ class CurrentsClient:
             'limit': limit,
         }
 
-        response_data = self._make_request(SEARCH_ENDPOINT, request_params)
+        response_data = self._http_client.request(SEARCH_ENDPOINT, request_params)
         return NewsResponse(**response_data)
 
     def __enter__(self) -> 'CurrentsClient':
@@ -351,80 +449,4 @@ class CurrentsClient:
             exc_val: Exception value if an exception occurred
             exc_tb: Exception traceback if an exception occurred
         """
-        if self.session:
-            self.session.close()
-
-    def _handle_response(self, response: requests.Response) -> Dict[str, Any]:
-        """Process API response and handle errors.
-
-        Args:
-            response: HTTP response object
-
-        Returns:
-            Parsed response data
-
-        Raises:
-            CurrentsResponseError: For invalid response format
-        """
-        try:
-            response.raise_for_status()
-        except requests.exceptions.HTTPError:
-            self._http_error_handler.handle_http_error(response.status_code, response)
-
-        response_data = self._http_error_handler.parse_response_json(response)
-
-        if not isinstance(response_data, dict):
-            raise CurrentsResponseError(ERROR_MESSAGES['invalid_response'])
-        return response_data
-
-    def _make_request(
-        self,
-        endpoint: str,
-        request_params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
-        """Make API request with retry logic.
-
-        Args:
-            endpoint: API endpoint to call
-            request_params: Query parameters
-
-        Returns:
-            Response data
-
-        Raises:
-            CurrentsConnectionError: If all retries fail
-        """
-        url = '{0}{1}'.format(self.base_url, endpoint)
-
-        for attempt in range(self.max_retries):
-            try:
-                response = self._make_single_request(url, request_params)
-            except requests.exceptions.RequestException:
-                if attempt == self.max_retries - 1:
-                    raise CurrentsConnectionError(ERROR_MESSAGES['connection_error'])
-                time.sleep(self.retry_delay * (2 ** attempt))
-                continue
-
-            return self._handle_response(response)
-
-        raise CurrentsConnectionError(ERROR_MESSAGES['connection_error'])
-
-    def _make_single_request(
-        self,
-        url: str,
-        request_params: Optional[Dict[str, Any]],
-    ) -> requests.Response:
-        """Make a single HTTP request.
-
-        Args:
-            url: Full URL to request
-            request_params: Query parameters
-
-        Returns:
-            HTTP response object
-        """
-        return self.session.get(
-            url,
-            params=request_params,
-            timeout=REQUEST_TIMEOUT,
-        )
+        self._http_client.close()

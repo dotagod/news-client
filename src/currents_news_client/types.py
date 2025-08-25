@@ -3,26 +3,68 @@
 from types import MappingProxyType
 from typing import Literal
 
-SUPPORTED_LANGUAGES = (  # noqa: WPS317
-    'en', 'es', 'fr', 'de', 'it', 'pt', 'ru',
-    'ar', 'hi', 'zh', 'ja', 'ko', 'th', 'vi',
+SUPPORTED_LANGUAGES = (
+    'en',
+    'es',
+    'fr',
+    'de',
+    'it',
+    'pt',
+    'ru',
+    'ar',
+    'hi',
+    'zh',
+    'ja',
+    'ko',
+    'th',
+    'vi',
 )
 
-LanguageCode = Literal[  # noqa: WPS317
-    'en', 'es', 'fr', 'de', 'it', 'pt', 'ru',
-    'ar', 'hi', 'zh', 'ja', 'ko', 'th', 'vi',
+LanguageCode = Literal[
+    'en',
+    'es',
+    'fr',
+    'de',
+    'it',
+    'pt',
+    'ru',
+    'ar',
+    'hi',
+    'zh',
+    'ja',
+    'ko',
+    'th',
+    'vi',
 ]
 
-SUPPORTED_CATEGORIES = (  # noqa: WPS317
-    'world', 'politics', 'business', 'technology',
-    'sports', 'entertainment', 'health', 'science',
-    'regional', 'hardware', 'lifestyle', 'travel',
+SUPPORTED_CATEGORIES = (
+    'world',
+    'politics',
+    'business',
+    'technology',
+    'sports',
+    'entertainment',
+    'health',
+    'science',
+    'regional',
+    'hardware',
+    'lifestyle',
+    'travel',
 )
 
-NewsCategory = Literal[  # noqa: WPS317
-    'world', 'politics', 'business', 'technology',
-    'sports', 'entertainment', 'health', 'science',
-    'regional', 'hardware', 'lifestyle', 'travel',
+NewsCategory = Literal[
+    'world',
+    'politics',
+    'business',
+    'technology',
+    'sports',
+    'entertainment',
+    'health',
+    'science',
+    'regional',
+    'hardware',
+    'lifestyle',
+    'travel',
 ]
 
 ResponseStatus = Literal['ok', 'error']

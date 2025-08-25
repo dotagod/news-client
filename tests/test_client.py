@@ -21,23 +21,11 @@ from currents_news_client.exceptions import (
 class TestCurrentsClient:
     """Test the CurrentsClient class."""
 
-    def test_init_with_api_key(self, valid_api_key):
-        """Test client initialization with API key."""
-        client = CurrentsClient(valid_api_key)
-        assert client.api_key == valid_api_key
-        assert client.base_url == 'https://api.currentsapi.services/v1'
-
     @patch.dict(os.environ, {}, clear=True)
     def test_init_without_api_key(self):
         """Test client initialization without API key raises error."""
         with pytest.raises(CurrentsAuthenticationError):
             CurrentsClient()
-
-    def test_init_with_custom_base_url(self, valid_api_key):
-        """Test client initialization with custom base URL."""
-        custom_url = 'https://custom-api.example.com/v1'
-        client = CurrentsClient(valid_api_key, base_url=custom_url)
-        assert client.base_url == custom_url
 
     @patch('src.currents_news_client.client.requests.Session')
     def test_get_latest_news_success(self, mock_session, mock_response, valid_api_key):

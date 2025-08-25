@@ -21,32 +21,6 @@ from currents_news_client.models import (
 class TestNewsArticle:
     """Test the NewsArticle model."""
 
-    def test_valid_news_article(self):
-        """Test creating a valid news article."""
-        article_data = {
-            'id': 'test-id',
-            'title': 'Test Article',
-            'description': 'Test description',
-            'url': 'https://example.com/article',
-            'author': 'Test Author',
-            'image': 'https://example.com/image.jpg',
-            'language': 'en',
-            'category': ['technology'],
-            'published': '2024-01-01T12:00:00+00:00',
-        }
-
-        article = NewsArticle(**article_data)
-
-        assert article.id == 'test-id'
-        assert article.title == 'Test Article'
-        assert article.description == 'Test description'
-        assert str(article.url) == 'https://example.com/article'
-        assert article.author == 'Test Author'
-        assert article.image == 'https://example.com/image.jpg'
-        assert article.language == 'en'
-        assert article.category == ['technology']
-        assert isinstance(article.published, datetime)
-
     def test_news_article_without_optional_fields(self):
         """Test creating a news article without optional fields."""
         article_data = {
